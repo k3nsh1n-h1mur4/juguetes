@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% for field in form %}
+  <div class="fieldwrapper">
+    {{ field.errors }}
+    {{ field.label_tag }} {{ field }}
+  </div>
+{% endfor %}

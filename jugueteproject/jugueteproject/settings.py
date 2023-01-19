@@ -1,3 +1,4 @@
+from django.forms.renderers import TemplatesSetting
 """
 Django settings for jugueteproject project.
 
@@ -121,3 +122,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#class CustomFormRenderer(TemplatesSetting):
+#    form_template_name = "form_snippets.html"
+    
+    
+#FORM_RENDERER = "jugueteproject.settings.CustomFormRenderer"
