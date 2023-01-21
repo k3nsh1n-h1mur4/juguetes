@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <table class="table-dark">
+                    <thead>
+                        <tr>
+                            <th scope="col">Folio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if ctx %}
+                            {% for ctx in ctx %}
+                        <tr>
+                            <th scope="row">{{ ctx.id }}</th>
+                            <td></td>
+                        </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

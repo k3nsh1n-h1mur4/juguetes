@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% include 'form_snippets.html' %}
+
+
+{% block content %}
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col">
+      <form method="POST">{% csrf_token %}
+        {% for field in form %}
+          <div class="fieldWrapper">
+            {{ field.errors }}
+            {{ field.label_tag }} {{ field }}
+          </div>
+        {% endfor %}
+        <p>
+          <input type="submit" value="Registrar" class="btn btn-primary">
+        </p>
+      </form>
+      </div>
+    </div>
+  </div> 
+{% endblock %}
