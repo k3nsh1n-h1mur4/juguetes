@@ -27,7 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
+LOGIN_REDIRECT_URL = '/juguete/v1/worker/registerW/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
 # Application definition
 
 INSTALLED_APPS = [

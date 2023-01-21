@@ -25,9 +25,13 @@ class workerModel(models.Model):
     matricula = models.CharField(max_length=20, null=False, blank=False, unique=True)
     nombre = models.CharField(max_length=150, null=False, blank=False)
     categoria = models.CharField(max_length=200, null=False, blank=False)
+    antiguedad = models.CharField(max_length=30, null=True, blank=False)
     adscripcion = models.CharField(max_length=200, null=False, blank=False)
+    t_contr = models.CharField(max_length=30, null=True, blank=False)
     turno = models.CharField(max_length=100, null=False, blank=False)
     email = models.CharField(max_length=100, null=False, blank=False)
+    domicilio = models.CharField(max_length=250, null=True, blank=False)
+    telefono = models.CharField(max_length=30, null=True, blank=False)
     createdat = models.DateTimeField(default=datetime.now())
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
