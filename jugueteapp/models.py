@@ -4,8 +4,10 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 # Create your models here.
-
 class User(models.Model):
+    class Meta:
+        db_table = 'users'
+
     id = models.BigAutoField(primary_key=True)
     username = models.CharField(max_length=100, null=False, blank=False, unique=True)
     email = models.CharField(max_length=150, null=False, blank=False)
@@ -20,6 +22,8 @@ class User(models.Model):
         
         
 class workerModel(models.Model):   
+    class Meta:
+        db_table = 'worker'
 
     id = models.BigAutoField(primary_key=True)
     matricula = models.CharField(max_length=20, null=False, blank=False, unique=True)
@@ -33,13 +37,15 @@ class workerModel(models.Model):
     domicilio = models.CharField(max_length=250, null=True, blank=False)
     telefono = models.CharField(max_length=30, null=True, blank=False)
     createdat = models.DateTimeField(default=datetime.now())
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_id = models.IntegerField(null=False, blank=False)
 
     def __str__(self):
         return self.matricula
     
     
 class childModel(models.Model):
+    class Meta:
+        db_table = 'chailds'
 
     id = models.BigAutoField(primary_key=True)
     nombre = models.CharField(max_length=200, null=False, blank=False)

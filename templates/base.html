@@ -9,6 +9,12 @@
     <title>{% block title %} {{ title }} - Juguete {% endblock %}</title>
 </head>
 <body>
+   <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a href="{% url 'logout' %}" class="btn btn-primary">LogOut</a>
+        <a href="{% url 'login' %}" class="btn btn-primary">LogIn</a>
+    </nav>
+   </div>
     {% block content %}
 
     {% endblock %}
