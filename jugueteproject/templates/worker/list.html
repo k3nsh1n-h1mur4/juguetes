@@ -1,13 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container">
+    <div class="container mt-5">
         <div class="row">
             <div class="col">
-                <table class="table-dark">
-                    <thead>
+                <table class="table">
+                    <thead class="thead-dark">
                         <tr>
                             <th scope="col">Folio</th>
+                            <th scope="col">Matrícula</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -15,7 +18,9 @@
                             {% for ctx in ctx %}
                         <tr>
                             <th scope="row">{{ ctx.id }}</th>
-                            <td></td>
+                            <td>{{ ctx.matricula }}</td>
+                            <td>{{ ctx.nombre }}</td>
+                            <td><a href="#" class="btn btn-secondary">Registrar Hijo(a)</a></td>
                         </tr>
                             {% endfor %}
                         {% endif %}

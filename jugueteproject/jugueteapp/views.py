@@ -45,23 +45,32 @@ def register(request):
 
 @login_required
 def login_user(request):
-    print(request.user.is_authenticated)
+    #print(request.user.is_authenticated)
     title = 'LogIn'
     form = loginForm()
     if request.method == 'POST':
         form = loginForm(request.POST)
         #print(form)
+        m = User.objects.get(username=request.POST['username'])
+        print("m")
+        print(m)
+        if m.check_password(request.POST['password']):
+            request.session['user_id'] = m.id
+            return redirect('registerW')
+            #return HttpResponse("Estas Logueado")
+        else:
+            return HttpResponse("no logueado")
         #email = form.data['email']
         #password = form.data['password']
         username = request.POST.get('username')
         password = request.POST.get('password')
-        print(username)
+        #print(username)
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            authenticate(request, username=username, password=password)
+            print(authenticate(request, username=username, password=password))
             login(request)
-            print(request.user)
+            #print(request.user)
 
             #print(user)
             #if user is not None:
@@ -75,10 +84,13 @@ def login_user(request):
 @login_required       
 def registerW(request):
     print(request.user.id)
+    print(request.user)
+
     title='Registro Trabajador'
-    form = workerForm(request.POST or None)
+    form = workerForm()
     if request.method == 'POST':
         form = workerForm(request.POST or None)
+        #print(form)
         if form.is_valid():
             matricula = form.cleaned_data['matricula']
             nombre = form.cleaned_data['nombre']
@@ -90,12 +102,22 @@ def registerW(request):
             email = form.cleaned_data['email']
             domicilio = form.cleaned_data['domicilio']
             telefono = form.cleaned_data['telefono']
-            worker = workerModel.objects.add(matricula=matricula, nombre=nombre, categoria=categoria, antiguedad=antiguedad, adscripcion=adscripcion, t_contr=t_contr, turno=turno, email=email, domicilio=domicilio, telefono=telefono, user_id=request.user.id)
+            worker = workerModel.objects.create(matricula=matricula, nombre=nombre, categoria=categoria, antiguedad=antiguedad, adscripcion=adscripcion, t_contr=t_contr, turno=turno, email=email, domicilio=domicilio, telefono=telefono, user_id=request.user.id)
+            print(worker)
             if worker is not None:
                 print("Trabajador Registrado")
                 return redirect('list')
+            else:
+                print("No registrado")
     return render(request, 'worker/registerW.html', {'form': form, 'title': title})
 
+
+@login_required
+def logout(request):
+    try:
+        del request.session['user_id']
+    except KeyError:
+        return HttpResponse("Deslogueado")
 
 @login_required
 def list(request):
