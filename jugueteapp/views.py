@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth.models import User, UserManager
 from jugueteproject.settings import BASE_DIR
@@ -5,8 +6,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 
-from jugueteapp.forms import UserForm, loginForm, workerForm
-from .models import workerModel
+from jugueteapp.forms import UserForm, loginForm, workerForm, childForm 
+from jugueteapp.models import workerModel, childModel
 
 @login_required
 def index(request):
@@ -127,6 +128,31 @@ def list(request):
         if ctx is None:
             print('No hay elementos que mostrar')
     return render(request, 'worker/list.html', {'ctx': ctx, 'title': title}) 
+
+@login_required
+def registerC(request, id):
+    form = childForm()
+    title = 'Registro Hijos(as)'
+    try:
+        pk = workerModel.objects.get(pk=id)
+        print(pk)
+        #form = childForm(request.POST)
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            f_nac = form.cleaned_data['f_nac']
+            edad = form.cleaned_data['edad']
+            sexo = form.cleaned_data['sexo']
+            entregado = form.cleaned_data['entregado']
+            child = childModel.objects.create(nombre=nombre.upper(), f_nac=f_nac, edad=edad, sexo=sexo.upper(), entregado=entregado.upper(), worker_id=pk)
+            if child is not None:
+                print('Registro Realizado')
+            else:
+                return HttpResponse('No realizado')
+        return render(request, 'childs/registerC.html', {'form': form, 'title': title, 'pk': pk})
+    except workerModel.DoesNotExist:
+        raise Http404('Worker does not exist')
+
+    return render(request, 'childs/registerC.html', {'form': form, 'title': title, 'id':id})
 
 @login_required
 def logout_views(request):

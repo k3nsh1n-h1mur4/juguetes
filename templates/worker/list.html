@@ -20,7 +20,7 @@
                             <th scope="row">{{ ctx.id }}</th>
                             <td>{{ ctx.matricula }}</td>
                             <td>{{ ctx.nombre }}</td>
-                            <td><a href="#" class="btn btn-secondary">Registrar Hijo(a)</a></td>
+                            <td><a href="{% url 'registerC' ctx.id %}" class="btn btn-secondary">Registrar Hijo(a)</a></td>
                         </tr>
                             {% endfor %}
                         {% endif %}

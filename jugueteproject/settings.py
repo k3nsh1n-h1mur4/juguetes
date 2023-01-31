@@ -130,3 +130,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
     
     
 #FORM_RENDERER = "jugueteproject.settings.CustomFormRenderer"
+STATIC_URLS = os.path.join(BASE_DIR, 'static')
+print(STATIC_URL)
+
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    "C:/Users/jazyi/django/juguetes/jugueteproject/static",  
+]
