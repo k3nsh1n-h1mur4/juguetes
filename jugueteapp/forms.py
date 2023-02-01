@@ -1,5 +1,6 @@
 from django import forms
-
+from django.core import validators
+from django.core.exceptions import ValidationError
 from .models import User, workerModel, childModel
 
 class UserForm(forms.Form):
@@ -30,6 +31,7 @@ class workerForm(forms.Form):
         ('08 EVENTUAL', '08 EVENTUAL'),
         ('CONFIANZA B', 'CONFIANZA B'),
     ]
+
     ADSCRIPCIONES = [
 	('BANCO DE SANGRE','BANCO DE SANGRE'),
 	('CAO','CAO'),
@@ -468,13 +470,16 @@ class workerForm(forms.Form):
     telefono =  forms.CharField(label='Teléfono', max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
 
+
 class childForm(forms.Form):
+
     SEXO = [
         ('HOMBRE', 'HOMBRE'),
         ('MUJER', 'MUJER'),
     ]
+
     nombre = forms.CharField(label='Nombre Niño(a)', max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    f_nac = forms.CharField(label='Fecha de Nacimiento', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    edad = forms.CharField(label='Edad', max_length=10, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    f_nac = forms.CharField(label='Fecha de Nacimiento', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    edad = forms.CharField(label='Edad', max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     sexo = forms.ChoiceField(label='Sexo', widget=forms.Select(attrs={'class': 'form-control'}), choices=SEXO,)
-    entregado = forms.CharField(label='Entregado', max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    entregado = forms.CharField(label='Entregado', max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)

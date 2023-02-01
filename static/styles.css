@@ -1,0 +1,35 @@
+body {
+    background-color: azure;
+}
+
+
+.btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+
+#menu-items {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+.container-image {
+    background: url('./juguetes.png') no-repeat center center;
+    background-size: cover;
+    height: 300px;
+}
+
+.btn-register {
+    margin-top: 3px;
+    display: flex;
+    width: 150px;
+    justify-content: center;
+}
+
+#nav {
+    display: flex;
+    justify-content: space-around;
+}
