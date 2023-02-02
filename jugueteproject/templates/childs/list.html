@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{{ message }}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Fecha Nacimiento</th>
+                            <th scope="col">Edad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if ctx %}
+                            {% for ctx in ctx %}
+                        <tr>
+                            <th scope="row">{{ ctx.nombre }}</th>
+                            <td>{{ ctx.f_nac }}</td>
+                            <td>{{ ctx.edad }}</td>
+                            <td><a href="{% url 'registerC' ctx.id %}" class="btn btn-secondary">Registrar Hijo(a)</a>
+                                <a href="{% url 'deleteC' ctx.id %}" class="btn btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

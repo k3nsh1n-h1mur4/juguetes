@@ -49,7 +49,7 @@ class childModel(models.Model):
 
     id = models.BigAutoField(primary_key=True)
     nombre = models.CharField(max_length=200, null=False, blank=False)
-    f_nac = models.CharField(max_length=200, null=False, blank=False)
+    f_nac = models.CharField(max_length=200, null=True, blank=True)
     edad = models.FloatField()
     sexo = models.CharField(max_length=20, null=False, blank=False)
     entregado = models.CharField(max_length=100, null=True, blank=True)

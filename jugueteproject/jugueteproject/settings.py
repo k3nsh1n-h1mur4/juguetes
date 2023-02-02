@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'jugueteapp',
 ]
 
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'jugueteproject.urls'
@@ -130,3 +132,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
     
     
 #FORM_RENDERER = "jugueteproject.settings.CustomFormRenderer"
+STATIC_URLS = os.path.join(BASE_DIR, 'static')
+print(STATIC_URL)
+
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    "C:/Users/jazyi/django/juguetes/jugueteproject/static",  
+]
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:8000',
+]

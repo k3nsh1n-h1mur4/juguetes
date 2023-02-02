@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{{ message }}
     <div class="container mt-5">
         <div class="row">
             <div class="col">
@@ -20,7 +21,9 @@
                             <th scope="row">{{ ctx.id }}</th>
                             <td>{{ ctx.matricula }}</td>
                             <td>{{ ctx.nombre }}</td>
-                            <td><a href="#" class="btn btn-secondary">Registrar Hijo(a)</a></td>
+                            <td><a href="{% url 'registerC' ctx.id %}" class="btn btn-secondary">Registrar Hijo(a)</a>
+                                <a href="{% url 'deleteW' ctx.id %}" class="btn btn-danger">Eliminar</a>
+                            </td>
                         </tr>
                             {% endfor %}
                         {% endif %}

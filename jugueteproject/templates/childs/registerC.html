@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% include 'form_snippets.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <form action="" method="POST" class="form">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="fieldWrapper">
+                    {{ field.errors }}
+                    {{ field.label_tag }} {{ field }}
+                    </div>
+                {% endfor %}
+                <div class="btns">
+                   <div>
+                     <input type="submit" value="Registrar" class="btn btn-primary">
+                   </div>
+                   <div>
+                     <button class="btn btn-warning" id="btn-calculateAge">Calcular Edad</button>
+                   </div> 
+                </div>
+                
+                <!-- <button type="button" class="inline-block px-4 py-2.5 bg-blue-600 text-white font-medium text-xs rounded">Calcular Edad</button> -->
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
