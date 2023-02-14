@@ -9,20 +9,24 @@
                 <table class="table">
                     <thead class="thead-dark">
                         <tr>
+                            <th scope="col">Id</th>
                             <th scope="col">Nombre</th>
                             <th scope="col">Fecha Nacimiento</th>
                             <th scope="col">Edad</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% if ctx %}
                             {% for ctx in ctx %}
                         <tr>
-                            <th scope="row">{{ ctx.nombre }}</th>
+                            <th scope="row">{{ ctx.id }}</th>
+                            <td>{{ ctx.nombre }}</td>
                             <td>{{ ctx.f_nac }}</td>
                             <td>{{ ctx.edad }}</td>
                             <td><a href="{% url 'registerC' ctx.id %}" class="btn btn-secondary">Registrar Hijo(a)</a>
                                 <a href="{% url 'deleteC' ctx.id %}" class="btn btn-danger">Eliminar</a>
+                                <a href="#" class="btn btn-warning">Generar Vale</a>
                             </td>
                         </tr>
                             {% endfor %}

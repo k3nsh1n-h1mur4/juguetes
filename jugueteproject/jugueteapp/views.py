@@ -1,10 +1,16 @@
-from django.http import Http404
+import os
+from django.http import Http404, FileResponse
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth.models import User, UserManager
 from jugueteproject.settings import BASE_DIR
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
+from fpdf import FPDF
+import sqlite3
+import qrcode
+from qrcode import QRCode
+from PIL import Image
 # Create your views here.
 
 from jugueteapp.forms import UserForm, loginForm, workerForm, childForm 
@@ -168,7 +174,7 @@ def registerC(request, id):
                 print(child)
                 if child is not None:
                     print('Registro Realizado')
-                    return redirect('list')
+                    return redirect('listC')
                 else:
                     return HttpResponse('No realizado')
             return render(request, 'childs/registerC.html', {'form': form, 'title': title, 'pk': pk})
@@ -195,9 +201,118 @@ def deleteC(request, id):
     print(id)
     return redirect('list')
     
-   
 
 
+def createImage(data):
+    qr = QRCode()
+    qr.add_data(data)
+    img = qr.make_image()
+
+    return img
+
+
+@login_required
+def valePdf(request, id):
+    #response = HttpResponse(content_type='application/pdf')
+    #response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
+    id = id
+    global FPDF
+    con = sqlite3.connect('db.sqlite3')
+    print(con)
+    cur = con.cursor() 
+    rows = cur.execute("SELECT * FROM worker INNER JOIN chailds WHERE worker.id=chailds.worker_id_id AND chailds.worker_id_id={0}".format(id))
+    result = rows.fetchall()
+    print(len(result))
+    con.commit()
+    o = createImage(result)
+    #qr = QRCode()
+    #qr.add_data(result)
+    #img = qr.make_image()
+    #img.save('qrcode' + ' ' + result[0][2] + '.png')
+    #print(img)
+    #cur.close()
+    #db.close()
+    class FPDF(FPDF):
+        from fpdf import FPDF
+        def setHeader(self):
+            directory_path = os.path.join(BASE_DIR, 'static')
+            img = os.path.join(directory_path, 'sntss-logo.png')
+            self.image(img, x=3.5, y=3.5, h=30, w=30)
+            img1 = os.path.join(directory_path, 'fuertes.png')
+            self.image(img1, x=175, y=3.5, w=30, h=30)
+            self.set_font('helvetica', size=12, style='B')
+            self.set_xy(x=30, y=7)
+            self.multi_cell(w=150, h=5, txt='SINDICATO NACIONAL DE TRABAJADORES DEL SEGURO SOCIAL\n SECCIÓN III, JALISCO\n SECRETERÍA DE ACTOS Y FESTEJOS\n REGISTRO JUGUETES 2023', align='C')
+        def setDataGrls(self):
+            self.set_font('helvetica', size=10, style='B')
+            self.text(x=10, y=38, txt='DATOS GENERALES TRABAJADOR:')
+        def setDataWorker(self):
+            self.set_font('helvetica', size=8, style='B')
+            self.set_xy(x=10, y=45)
+            self.cell(txt='Nombre:')
+            self.set_xy(x=25, y= 44.5)
+            self.cell(txt=result[0][2], border=0, fill=False)
+            self.set_xy(x=90, y=45)
+            self.cell(txt='Matrícula: ', border=0, fill=False)
+            self.set_xy(x=110, y=44.5)
+            self.set_fill_color(230, 230, 0)
+            self.cell(txt=result[0][1], border=0, fill=True)
+            self.set_xy(x=130 , y=45)
+            self.cell(txt='Adscripción:', border=0, fill=0)
+            self.set_xy(x=150, y=43.5)
+            self.set_font('helvetica', size=8, style='B')
+            self.multi_cell(w=55, h=5, txt=result[0][5], align='J', border=0, fill=False)
+        def setChildrens(self):
+            self.set_font('helvetica', size=10, style='B')
+            self.text(x=10, y=60, txt='DATOS NIÑOS(AS) REGISTRADOS: ')
+            self.set_xy(x=10, y=65)
+            self.set_font('helvetica', size=8, style='B')
+            self.cell(txt='Nombre niño(a):', border=0, fill=0)
+            self.set_xy(x=35, y=64.5)
+            self.cell(txt=result[0][14], border=0, fill=0)
+            self.set_xy(x=90, y=64.5)
+            self.cell(txt='Edad:')
+            edad = str(result[0][16])
+            self.cell(txt=edad)
+            self.set_xy(x=130, y=65)
+            self.cell(txt='Sexo:')
+            self.set_xy(x=140 , y=64.5)
+            self.cell(txt=result[0][17], border=0, fill=0)
+            #self.image(o, x=40, y=70)
+
+
+
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.setHeader()
+    pdf.setDataGrls()
+    pdf.setDataWorker()
+    pdf.setChildrens()
+    pdf.output("f.pdf")
+    
+    return HttpResponse(result)
+    #return render(request, 'worker/qrcode.html', {'result': result})
+    #res = HttpResponse(render(request, 'worker/qrcode.html', {'img': img}))
+    #return res
+    #res.headers['Content-Type'] = 'application/pdf'
+    #res.headers['Content-Disposition'] = 'attachment; filename=asdasd.pdf'
+    #return HttpResponse(result)
+    #return res
+
+
+@login_required
+def getQrcode(request, id):
+    id = id
+    db = sqlite3.connect('db.sqlite3')
+    print(db)
+    cur = db.cursor() 
+    rows = cur.execute("SELECT * FROM worker INNER JOIN chailds WHERE worker.id=chailds.worker_id_id AND chailds.worker_id_id={0}".format(id))
+    result = rows.fetchall()
+    print(len(result))
+    db.commit()
+    cur.close()
+    db.close()
+    return render(request, 'worker/qrcode.html', {'result': result})
 
 
 @login_required

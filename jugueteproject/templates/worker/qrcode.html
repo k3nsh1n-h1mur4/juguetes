@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load qr_code %}
+
+
+{% block content %}
+    {% for i in result %}
+        {% qr_from_data  micro=True image_format='png' %}
+    {% endfor %}
+{% endblock %}
+
+

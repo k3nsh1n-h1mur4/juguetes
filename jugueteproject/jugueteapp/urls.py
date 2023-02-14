@@ -13,6 +13,8 @@ urlpatterns = [
     path('childs/registerC/<int:id>/', views.registerC, name='registerC'),
     path('childs/list/', views.listC, name='listC'),
     path('childs/delete/<int:id>', views.deleteC, name='deleteC'),
+    path('valepdf/<int:id>', views.valePdf, name='valePdf'),
+    path('qrcode/<int:id>/', views.getQrcode, name='getQrcode'),
     
     #path('worker/list/', views.list, name='list),
 ]
