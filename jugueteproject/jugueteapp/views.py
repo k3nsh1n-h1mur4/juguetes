@@ -11,6 +11,13 @@ import sqlite3
 import qrcode
 from qrcode import QRCode
 from PIL import Image
+import pyqrcode
+import io
+import reportlab
+from reportlab.pdfgen import canvas
+from reportlab.lib.styles import ParagraphStyle
+
+
 # Create your views here.
 
 from jugueteapp.forms import UserForm, loginForm, workerForm, childForm 
@@ -204,17 +211,40 @@ def deleteC(request, id):
 
 
 def createImage(data):
+    #qr = pyqrcode.create(data)
+    #img = qr.png('image.png', scale=5, encode='binary')
     qr = QRCode()
     qr.add_data(data)
     img = qr.make_image()
-
+    #img.show()
+    #img.show()
+    #print(img)
     return img
+
+
+def createQR(request, id):
+    id = id
+    con = sqlite3.connect('db.sqlite3')
+    print(con)
+    cur = con.cursor() 
+    rows = cur.execute("SELECT * FROM worker INNER JOIN chailds WHERE worker.id=chailds.worker_id_id AND chailds.worker_id_id={0}".format(id))
+    result = rows.fetchall()
+    print(len(result))
+    con.commit()
+    qr = QRCode()
+    qr.add_data(result)
+    img = qr.make_image()
+    return render(request, 'worker/qrcode.html', {'img': img})
+    
+
 
 
 @login_required
 def valePdf(request, id):
     #response = HttpResponse(content_type='application/pdf')
     #response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
+    r = request 
+    print(r)
     id = id
     global FPDF
     con = sqlite3.connect('db.sqlite3')
@@ -224,7 +254,7 @@ def valePdf(request, id):
     result = rows.fetchall()
     print(len(result))
     con.commit()
-    o = createImage(result)
+    createImage(result)
     #qr = QRCode()
     #qr.add_data(result)
     #img = qr.make_image()
@@ -278,6 +308,10 @@ def valePdf(request, id):
             self.cell(txt='Sexo:')
             self.set_xy(x=140 , y=64.5)
             self.cell(txt=result[0][17], border=0, fill=0)
+            path = os.path.join(BASE_DIR, 'pdfs')
+            
+
+            #print(dir(im))
             #self.image(o, x=40, y=70)
 
 
@@ -319,3 +353,32 @@ def getQrcode(request, id):
 def logout_views(request):
     logout(request)
     return redirect('login_user')
+
+
+
+def createpdf(request, id):
+    id = id
+    con = sqlite3.connect("db.sqlite3")
+    cur = con.cursor()
+    result = cur.execute("SELECT * FROM worker INNER JOIN chailds WHERE worker.id=chailds.worker_id_id AND chailds.worker_id_id={0}".format(id))
+    rows = result.fetchall()
+    result = con.commit()
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer)
+    directory_path = os.path.join(BASE_DIR, 'static')
+    img = os.path.join(directory_path, 'sntss-logo.png')
+    img1 = os.path.join(directory_path, 'fuertes.png')
+
+    p.drawImage(img, 5, 750, 80, 80)
+    p.drawImage(img1, 500, 750, 80, 80)
+    
+    p.drawString(90, 770, 'SINDICATO NACIONAL DE TRABAJADORES DEL SEGURO SOCIAL')
+    p.drawString(90, 740, 'SECCIÓN III, JALISCO')
+
+    p.drawString(10, 10, rows[0][2])
+    p.showPage()
+    p.save()
+    buffer.seek(0)
+    cur.close()
+    con.close()
+    return FileResponse(buffer, as_attachment=True, filename='hello.pdf')

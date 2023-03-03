@@ -15,6 +15,6 @@ urlpatterns = [
     path('childs/delete/<int:id>', views.deleteC, name='deleteC'),
     path('valepdf/<int:id>', views.valePdf, name='valePdf'),
     path('qrcode/<int:id>/', views.getQrcode, name='getQrcode'),
-    
+    path('createpdf/<int:id>/', views.createpdf, name='createpdf'), 
     #path('worker/list/', views.list, name='list),
 ]

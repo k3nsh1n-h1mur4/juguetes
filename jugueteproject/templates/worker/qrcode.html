@@ -4,9 +4,7 @@
 
 
 {% block content %}
-    {% for i in result %}
-        {% qr_from_data  micro=True image_format='png' %}
-    {% endfor %}
+        {% qr_from_data img micro=True image_format='png' %}
 {% endblock %}
 
 
