@@ -53,6 +53,7 @@ class childModel(models.Model):
     edad = models.FloatField()
     sexo = models.CharField(max_length=20, null=False, blank=False)
     entregado = models.CharField(max_length=100, null=True, blank=True)
+    qrimg = models.BinaryField()
     createdat = models.DateTimeField(default=datetime.now())
     worker_id = models.ForeignKey(workerModel, on_delete=models.CASCADE)
     

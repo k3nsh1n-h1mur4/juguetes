@@ -14,7 +14,9 @@ from PIL import Image
 import pyqrcode
 import io
 import reportlab
+from PIL import Image
 from reportlab.pdfgen import canvas
+import segno
 from reportlab.lib.styles import ParagraphStyle
 
 
@@ -177,11 +179,12 @@ def registerC(request, id):
                 print(edad)
                 sexo = form.cleaned_data['sexo']
                 entregado = form.cleaned_data['entregado']
+                
                 child = childModel.objects.create(nombre=nombre.upper(), f_nac=f_nac, edad=edad, sexo=sexo.upper(), entregado=entregado.upper(), worker_id=pk)
                 print(child)
                 if child is not None:
                     print('Registro Realizado')
-                    return redirect('listC')
+                    return redirect('list')
                 else:
                     return HttpResponse('No realizado')
             return render(request, 'childs/registerC.html', {'form': form, 'title': title, 'pk': pk})
@@ -211,31 +214,22 @@ def deleteC(request, id):
 
 
 def createImage(data):
-    #qr = pyqrcode.create(data)
-    #img = qr.png('image.png', scale=5, encode='binary')
-    qr = QRCode()
-    qr.add_data(data)
-    img = qr.make_image()
-    #img.show()
-    #img.show()
-    #print(img)
-    return img
+    img = qrcode.make(data)
+    img.save('qrcodeImage.png')
+    return img  
 
 
 def createQR(request, id):
     id = id
     con = sqlite3.connect('db.sqlite3')
-    print(con)
     cur = con.cursor() 
-    rows = cur.execute("SELECT * FROM worker INNER JOIN chailds WHERE worker.id=chailds.worker_id_id AND chailds.worker_id_id={0}".format(id))
-    result = rows.fetchall()
-    print(len(result))
-    con.commit()
-    qr = QRCode()
-    qr.add_data(result)
-    img = qr.make_image()
-    return render(request, 'worker/qrcode.html', {'img': img})
-    
+    cur.execute("SELECT * FROM worker INNER JOIN chailds WHERE worker.id=chailds.worker_id_id AND chailds.worker_id_id={0}".format(id))
+    result = cur.fetchall()
+    #qr = qrcode.make(result)
+    #qr.save('newqr.png')
+    createImage(result)
+    return redirect('list')
+#return render(request, 'worker/qrcode.html', {'qr': qr}) 
 
 
 
@@ -251,10 +245,13 @@ def valePdf(request, id):
     print(con)
     cur = con.cursor() 
     rows = cur.execute("SELECT * FROM worker INNER JOIN chailds WHERE worker.id=chailds.worker_id_id AND chailds.worker_id_id={0}".format(id))
+    #print(rows.rowcount)
     result = rows.fetchall()
     print(len(result))
     con.commit()
+    #print('hhhh')
     createImage(result)
+    #Image.open(createImage(result))
     #qr = QRCode()
     #qr.add_data(result)
     #img = qr.make_image()
@@ -262,58 +259,370 @@ def valePdf(request, id):
     #print(img)
     #cur.close()
     #db.close()
-    class FPDF(FPDF):
-        from fpdf import FPDF
-        def setHeader(self):
-            directory_path = os.path.join(BASE_DIR, 'static')
-            img = os.path.join(directory_path, 'sntss-logo.png')
-            self.image(img, x=3.5, y=3.5, h=30, w=30)
-            img1 = os.path.join(directory_path, 'fuertes.png')
-            self.image(img1, x=175, y=3.5, w=30, h=30)
-            self.set_font('helvetica', size=12, style='B')
-            self.set_xy(x=30, y=7)
-            self.multi_cell(w=150, h=5, txt='SINDICATO NACIONAL DE TRABAJADORES DEL SEGURO SOCIAL\n SECCIÓN III, JALISCO\n SECRETERÍA DE ACTOS Y FESTEJOS\n REGISTRO JUGUETES 2023', align='C')
-        def setDataGrls(self):
-            self.set_font('helvetica', size=10, style='B')
-            self.text(x=10, y=38, txt='DATOS GENERALES TRABAJADOR:')
-        def setDataWorker(self):
-            self.set_font('helvetica', size=8, style='B')
-            self.set_xy(x=10, y=45)
-            self.cell(txt='Nombre:')
-            self.set_xy(x=25, y= 44.5)
-            self.cell(txt=result[0][2], border=0, fill=False)
-            self.set_xy(x=90, y=45)
-            self.cell(txt='Matrícula: ', border=0, fill=False)
-            self.set_xy(x=110, y=44.5)
-            self.set_fill_color(230, 230, 0)
-            self.cell(txt=result[0][1], border=0, fill=True)
-            self.set_xy(x=130 , y=45)
-            self.cell(txt='Adscripción:', border=0, fill=0)
-            self.set_xy(x=150, y=43.5)
-            self.set_font('helvetica', size=8, style='B')
-            self.multi_cell(w=55, h=5, txt=result[0][5], align='J', border=0, fill=False)
-        def setChildrens(self):
-            self.set_font('helvetica', size=10, style='B')
-            self.text(x=10, y=60, txt='DATOS NIÑOS(AS) REGISTRADOS: ')
-            self.set_xy(x=10, y=65)
-            self.set_font('helvetica', size=8, style='B')
-            self.cell(txt='Nombre niño(a):', border=0, fill=0)
-            self.set_xy(x=35, y=64.5)
-            self.cell(txt=result[0][14], border=0, fill=0)
-            self.set_xy(x=90, y=64.5)
-            self.cell(txt='Edad:')
-            edad = str(result[0][16])
-            self.cell(txt=edad)
-            self.set_xy(x=130, y=65)
-            self.cell(txt='Sexo:')
-            self.set_xy(x=140 , y=64.5)
-            self.cell(txt=result[0][17], border=0, fill=0)
-            path = os.path.join(BASE_DIR, 'pdfs')
+    if len(result) == 1:
+        class FPDF(FPDF):
+            from fpdf import FPDF
+            def setHeader(self):
+                directory_path = os.path.join(BASE_DIR, 'static')
+                img = os.path.join(directory_path, 'sntss-logo.png')
+                self.image(img, x=3.5, y=3.5, h=30, w=30)
+                img1 = os.path.join(directory_path, 'fuertes.png')
+                self.image(img1, x=175, y=3.5, w=30, h=30)
+                self.set_font('helvetica', size=12, style='B')
+                self.set_xy(x=30, y=7)
+                self.multi_cell(w=150, h=5, txt='SINDICATO NACIONAL DE TRABAJADORES DEL SEGURO SOCIAL\n SECCIÓN III, JALISCO\n SECRETERÍA DE ACTOS Y FESTEJOS\n REGISTRO JUGUETES 2023', align='C')
+            def setDataGrls(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=38, txt='DATOS GENERALES TRABAJADOR:')
+            def setDataWorker(self):
+                self.set_font('helvetica', size=8, style='B')
+                self.set_xy(x=10, y=45)
+                self.cell(txt='Nombre:')
+                self.set_xy(x=25, y= 44.5)
+                self.cell(txt=result[0][2], border=0, fill=False)
+                self.set_xy(x=10, y=50)
+                self.cell(txt='Matrícula: ', border=0, fill=False)
+                self.set_xy(x=30, y=50)
+                self.set_fill_color(230, 230, 0)
+                self.cell(txt=result[0][1], border=0, fill=True)
+                self.set_xy(x=10 , y=55)
+                self.cell(txt='Adscripción:', border=0, fill=0)
+                self.set_xy(x=35, y=54)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][5], align='J', border=0, fill=False)
+                self.set_xy(x=10, y=60)
+                self.cell(txt='Telefóno:', border=0, fill=0)
+                self.set_xy(x=35, y=60)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][10], align='J', border=0, fill=False)
+            def setChildrens(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=75, txt='DATOS NIÑOS(AS) REGISTRADOS: ')
+
+                self.set_xy(x=10, y=80)
+                self.set_font('helvetica', size=6.5, style='B')
+                self.cell(txt='Nombre niño(a):', border=0, fill=0)
+                self.set_xy(x=30, y=79.5)
+                self.cell(txt=result[0][14], border=0, fill=0)
+
+                self.set_xy(x=10, y=85)
+                self.cell(txt='Edad:')
+                edad = str(result[0][16])
+                self.cell(txt=edad)
+
+                self.set_xy(x=10, y=90)
+                self.cell(txt='Sexo:')
+                self.set_xy(x=21 , y=90)
+                self.cell(txt=result[0][17], border=0, fill=0)
+
+            def setImageQrCode(self):
+                qr = os.path.join(BASE_DIR, 'qrcodeImage.png')
+                self.image(qr, x=120, y=35, w=35, h=35)
             
+            def setFooter(self):
+                self.set_font('helvetica', size=8, style='B')
+                self.set_xy(x=10, y=100)
+                self.cell(txt='FIRMA:_________________________________')
 
-            #print(dir(im))
-            #self.image(o, x=40, y=70)
+                self.set_xy(x=120, y=100)
+                self.cell(txt='Tipo Juguete:__________________________________')
+                
+            def setHeader1(self):
+                directory_path = os.path.join(BASE_DIR, 'static')
+                img = os.path.join(directory_path, 'sntss-logo.png')
+                self.image(img, x=3.5, y=118, h=30, w=30)
+                img1 = os.path.join(directory_path, 'fuertes.png')
+                self.image(img1, x=175, y=118, w=30, h=30)
+                self.set_font('helvetica', size=12, style='B')
+                self.set_xy(x=30, y=122)
+                self.multi_cell(w=150, h=5, txt='SINDICATO NACIONAL DE TRABAJADORES DEL SEGURO SOCIAL\n SECCIÓN III, JALISCO\n SECRETERÍA DE ACTOS Y FESTEJOS\n REGISTRO JUGUETES 2023', align='C')
+            def setDataGrls1(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=155, txt='DATOS GENERALES TRABAJADOR:')
+            def setDataWorker1(self):
+                self.set_font('helvetica', size=8, style='B')
+                self.set_xy(x=10, y=163)
+                self.cell(txt='Nombre:')
+                self.set_xy(x=25, y= 163)
+                self.cell(txt=result[0][2], border=0, fill=False)
+                self.set_xy(x=10, y=168)
+                self.cell(txt='Matrícula: ', border=0, fill=False)
+                self.set_xy(x=30, y=168)
+                self.set_fill_color(230, 230, 0)
+                self.cell(txt=result[0][1], border=0, fill=True)
+                self.set_xy(x=10 , y=173)
+                self.cell(txt='Adscripción:', border=0, fill=0)
+                self.set_xy(x=33, y=172.5)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][5], align='J', border=0, fill=False)
+                self.set_xy(x=10, y=178)
+                self.cell(txt='Telefóno:', border=0, fill=0)
+                self.set_xy(x=35, y=177)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][10], align='J', border=0, fill=False)
+            def setChildrens1(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=192, txt='DATOS NIÑOS(AS) REGISTRADOS: ')
 
+                self.set_xy(x=10, y=197)
+                self.set_font('helvetica', size=6.5, style='B')
+                self.cell(txt='Nombre niño(a):', border=0, fill=0)
+                self.set_xy(x=30, y=197)
+                self.cell(txt=result[0][14], border=0, fill=0)
+
+                self.set_xy(x=10, y=202)
+                self.cell(txt='Edad:')
+                edad = str(result[0][16])
+                self.cell(txt=edad)
+
+                self.set_xy(x=10, y=207)
+                self.cell(txt='Sexo:')
+                self.set_xy(x=21 , y=207)
+                self.cell(txt=result[0][17], border=0, fill=0)
+
+            def setImageQrCode1(self):
+                qr = os.path.join(BASE_DIR, 'qrcodeImage.png')
+                self.image(qr, x=120, y=156, w=35, h=35)
+            
+            def setFooter1(self):
+                self.set_font('helvetica', size=8, style='B')
+                self.set_xy(x=10, y=265)
+                self.cell(txt='FIRMA:_________________________________')
+
+                self.set_xy(x=120, y=265)
+                self.cell(txt='Tipo Juguete:__________________________________')             
+
+        
+        
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------
+    elif len(result) == 2:
+        class FPDF(FPDF):
+            from fpdf import FPDF
+            def setHeader(self):
+                directory_path = os.path.join(BASE_DIR, 'static')
+                img = os.path.join(directory_path, 'sntss-logo.png')
+                self.image(img, x=3.5, y=3.5, h=30, w=30)
+                img1 = os.path.join(directory_path, 'fuertes.png')
+                self.image(img1, x=175, y=3.5, w=30, h=30)
+                self.set_font('helvetica', size=12, style='B')
+                self.set_xy(x=30, y=7)
+                self.multi_cell(w=150, h=5, txt='SINDICATO NACIONAL DE TRABAJADORES DEL SEGURO SOCIAL\n SECCIÓN III, JALISCO\n SECRETERÍA DE ACTOS Y FESTEJOS\n REGISTRO JUGUETES 2023', align='C')
+            def setDataGrls(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=38, txt='DATOS GENERALES TRABAJADOR:')
+            def setDataWorker(self):
+                self.set_font('helvetica', size=8, style='B')
+                self.set_xy(x=10, y=45)
+                self.cell(txt='Nombre:')
+                self.set_xy(x=25, y= 44.5)
+                self.cell(txt=result[0][2], border=0, fill=False)
+                self.set_xy(x=10, y=50)
+                self.cell(txt='Matrícula: ', border=0, fill=False)
+                self.set_xy(x=30, y=50)
+                self.set_fill_color(230, 230, 0)
+                self.cell(txt=result[0][1], border=0, fill=True)
+                self.set_xy(x=10 , y=55)
+                self.cell(txt='Adscripción:', border=0, fill=0)
+                self.set_xy(x=35, y=54)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][5], align='J', border=0, fill=False)
+                self.set_xy(x=10, y=60)
+                self.cell(txt='Telefóno:', border=0, fill=0)
+                self.set_xy(x=35, y=60)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][10], align='J', border=0, fill=False)
+            def setChildrens(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=75, txt='DATOS NIÑOS(AS) REGISTRADOS: ')
+
+                self.set_xy(x=10, y=80)
+                self.set_font('helvetica', size=6, style='B')
+                self.cell(txt='Nombre niño(a):', border=0, fill=0)
+                self.set_xy(x=28, y=79.5)
+                self.cell(txt=result[1][14], border=0, fill=0)
+
+                self.set_xy(x=10, y=85)
+                self.cell(txt='Edad:')
+                edad = str(result[0][16])
+                self.cell(txt=edad)
+
+                self.set_xy(x=10, y=90)
+                self.cell(txt='Sexo:')
+                self.set_xy(x=21 , y=90)
+                self.cell(txt=result[0][17], border=0, fill=0)
+
+                # setChildren2
+                self.set_xy(x=100, y=80)
+                self.set_font('helvetica', size=6, style='B')
+                self.cell(txt='Nombre niño(a):', border=0, fill=0)
+                self.set_xy(x=120, y=79.5)
+                self.cell(txt=result[1][14], border=0, fill=0)
+
+                self.set_xy(x=100, y=85)
+                self.cell(txt='Edad:')
+                edad = str(result[1][16])
+                self.cell(txt=edad)
+
+                self.set_xy(x=100, y=90)
+                self.cell(txt='Sexo:')
+                self.set_xy(x=107 , y=90)
+                self.cell(txt=result[1][17], border=0, fill=0)
+
+            def setImageQrCode(self):
+                qr = os.path.join(BASE_DIR, 'qrcodeImage.png')
+                self.image(qr, x=120, y=35, w=35, h=35)
+
+            def setFooter(self):
+                self.set_font('helvetica', size=8, style='B')
+                self.set_xy(x=10, y=110)
+                self.cell(txt='FIRMA:_________________________________')
+
+                self.set_xy(x=120, y=110)
+                self.cell(txt='Tipo Juguete:__________________________________')
+
+            def setHeader1(self):
+                directory_path = os.path.join(BASE_DIR, 'static')
+                img = os.path.join(directory_path, 'sntss-logo.png')
+                self.image(img, x=3.5, y=130, h=30, w=30)
+                img1 = os.path.join(directory_path, 'fuertes.png')
+                self.image(img1, x=175, y=130, w=30, h=30)
+                self.set_font('helvetica', size=12, style='B')
+                self.set_xy(x=30, y=135)
+                self.multi_cell(w=150, h=5, txt='SINDICATO NACIONAL DE TRABAJADORES DEL SEGURO SOCIAL\n SECCIÓN III, JALISCO\n SECRETERÍA DE ACTOS Y FESTEJOS\n REGISTRO JUGUETES 2023', align='C')
+            def setDataGrls1(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=170, txt='DATOS GENERALES TRABAJADOR:')
+            def setDataWorker1(self):
+                self.set_font('helvetica', size=8, style='B')
+                self.set_xy(x=10, y=175)
+                self.cell(txt='Nombre:')
+                self.set_xy(x=25, y=175)
+                self.cell(txt=result[0][2], border=0, fill=False)
+                self.set_xy(x=10, y=180)
+                self.cell(txt='Matrícula: ', border=0, fill=False)
+                self.set_xy(x=30, y=180)
+                self.set_fill_color(230, 230, 0)
+                self.cell(txt=result[0][1], border=0, fill=True)
+                self.set_xy(x=10, y=185)
+                self.cell(txt='Adscripción:', border=0, fill=0)
+                self.set_xy(x=35, y=185)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][5], align='J', border=0, fill=False)
+                self.set_xy(x=10, y=190)
+                self.cell(txt='Telefóno:', border=0, fill=0)
+                self.set_xy(x=35, y=190)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][10], align='J', border=0, fill=False)
+            def setChildrens1(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=205, txt='DATOS NIÑOS(AS) REGISTRADOS: ')
+
+                self.set_xy(x=10, y=210)
+                self.set_font('helvetica', size=6, style='B')
+                self.cell(txt='Nombre niño(a):', border=0, fill=0)
+                self.set_xy(x=28, y=210)
+                self.cell(txt=result[1][14], border=0, fill=0)
+
+                self.set_xy(x=10, y=215)
+                self.cell(txt='Edad:')
+                edad = str(result[0][16])
+                self.cell(txt=edad)
+
+                self.set_xy(x=10, y=220)
+                self.cell(txt='Sexo:')
+                self.set_xy(x=21, y=220)
+                self.cell(txt=result[0][17], border=0, fill=0)
+
+                # setChildren2
+                self.set_xy(x=100, y=210)
+                self.set_font('helvetica', size=6, style='B')
+                self.cell(txt='Nombre niño(a):', border=0, fill=0)
+                self.set_xy(x=120, y=210)
+                self.cell(txt=result[1][14], border=0, fill=0)
+
+                self.set_xy(x=100, y=215)
+                self.cell(txt='Edad:')
+                edad = str(result[1][16])
+                self.cell(txt=edad)
+
+                self.set_xy(x=100, y=220)
+                self.cell(txt='Sexo:')
+                self.set_xy(x=107 , y=220)
+                self.cell(txt=result[1][17], border=0, fill=0)
+
+            def setImageQrCode1(self):
+                qr = os.path.join(BASE_DIR, 'qrcodeImage.png')
+                self.image(qr, x=120, y=171, w=35, h=35)
+
+            def setFooter1(self):
+                self.set_font('helvetica', size=8, style='B')
+                self.set_xy(x=10, y=265)
+                self.cell(txt='FIRMA:_________________________________')
+
+                self.set_xy(x=120, y=265)
+                self.cell(txt='Tipo Juguete:__________________________________')
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------                
+    elif len(result) == 3:
+        class FPDF(FPDF):
+            from fpdf import FPDF
+            def setHeader(self):
+                directory_path = os.path.join(BASE_DIR, 'static')
+                img = os.path.join(directory_path, 'sntss-logo.png')
+                self.image(img, x=3.5, y=3.5, h=30, w=30)
+                img1 = os.path.join(directory_path, 'fuertes.png')
+                self.image(img1, x=175, y=3.5, w=30, h=30)
+                self.set_font('helvetica', size=12, style='B')
+                self.set_xy(x=30, y=7)
+                self.multi_cell(w=150, h=5, txt='SINDICATO NACIONAL DE TRABAJADORES DEL SEGURO SOCIAL\n SECCIÓN III, JALISCO\n SECRETERÍA DE ACTOS Y FESTEJOS\n REGISTRO JUGUETES 2023', align='C')
+            def setDataGrls(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=38, txt='DATOS GENERALES TRABAJADOR:')
+            def setDataWorker(self):
+                self.set_font('helvetica', size=8, style='B')
+                self.set_xy(x=10, y=45)
+                self.cell(txt='Nombre:')
+                self.set_xy(x=25, y= 44.5)
+                self.cell(txt=result[0][2], border=0, fill=False)
+                self.set_xy(x=10, y=50)
+                self.cell(txt='Matrícula: ', border=0, fill=False)
+                self.set_xy(x=30, y=50)
+                self.set_fill_color(230, 230, 0)
+                self.cell(txt=result[0][1], border=0, fill=True)
+                self.set_xy(x=10 , y=55)
+                self.cell(txt='Adscripción:', border=0, fill=0)
+                self.set_xy(x=35, y=54)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][5], align='J', border=0, fill=False)
+                self.set_xy(x=10, y=60)
+                self.cell(txt='Telefóno:', border=0, fill=0)
+                self.set_xy(x=35, y=60)
+                self.set_font('helvetica', size=8, style='B')
+                self.multi_cell(w=55, h=5, txt=result[0][10], align='J', border=0, fill=False)
+            def setChildrens(self):
+                self.set_font('helvetica', size=10, style='B')
+                self.text(x=10, y=75, txt='DATOS NIÑOS(AS) REGISTRADOS: ')
+
+                self.set_xy(x=10, y=80)
+                self.set_font('helvetica', size=6.5, style='B')
+                self.cell(txt='Nombre niño(a):', border=0, fill=0)
+                self.set_xy(x=30, y=79.5)
+                self.cell(txt=result[0][14], border=0, fill=0)
+
+                self.set_xy(x=10, y=85)
+                self.cell(txt='Edad:')
+                edad = str(result[0][16])
+                self.cell(txt=edad)
+
+                self.set_xy(x=10, y=90)
+                self.cell(txt='Sexo:')
+                self.set_xy(x=21 , y=90)
+                self.cell(txt=result[0][17], border=0, fill=0)
+
+
+
+            def setImageQrCode(self):
+                qr = os.path.join(BASE_DIR, 'qrcodeImage.png')
+                self.image(qr, x=120, y=35, w=35, h=35)
 
 
     pdf = FPDF()
@@ -322,6 +631,14 @@ def valePdf(request, id):
     pdf.setDataGrls()
     pdf.setDataWorker()
     pdf.setChildrens()
+    pdf.setImageQrCode()
+    pdf.setFooter()
+    pdf.setHeader1()
+    pdf.setDataGrls1()
+    pdf.setDataWorker1()
+    pdf.setChildrens1()
+    pdf.setImageQrCode1()
+    pdf.setFooter1()
     pdf.output("f.pdf")
     
     return HttpResponse(result)

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'qr_code',
     'jugueteapp',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

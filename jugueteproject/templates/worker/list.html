@@ -23,6 +23,8 @@
                             <td>{{ ctx.nombre }}</td>
                             <td><a href="{% url 'registerC' ctx.id %}" class="btn btn-secondary">Registrar Hijo(a)</a>
                                 <a href="{% url 'deleteW' ctx.id %}" class="btn btn-danger">Eliminar</a>
+				                <a href="{% url 'valePdf' ctx.id %}" class="btn btn-warning">Generar Vale</a>
+                                <a href="{% url 'createQR' ctx.id %}" class="btn btn-primary">Genera QR</a>    
                             </td>
                         </tr>
                             {% endfor %}
