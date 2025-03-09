@@ -17,7 +17,11 @@ class loginForm(forms.Form):
 
 
 class workerForm(forms.Form):
-
+    SEXO = [
+		("HOMBRE", "HOMBRE"),
+        ("MUJER", "MUJER"),
+	]
+     
     TURNO = [
         ('MATUTINO', 'MATUTINO'),
         ('VESPERTINO', 'VESPERTINO'),
@@ -458,6 +462,7 @@ class workerForm(forms.Form):
 ("Veterinario","Veterinario"), 
 ("Yesista","Yesista"), ]
 
+
     matricula = forms.CharField(label='Matrícula', max_length=100, widget=forms.TextInput({'class': 'form-control'}))
     nombre = forms.CharField(label='Nombre Completo', max_length=250, widget=forms.TextInput({'class':'form-control'}))
     categoria = forms.ChoiceField(label='Categoría', widget=forms.Select(attrs={'class': 'form-control'}), choices=CATEGORIAS,)
@@ -467,6 +472,9 @@ class workerForm(forms.Form):
     turno = forms.ChoiceField(label='Turno', widget=forms.Select(attrs={'class': 'form-control'}), choices=TURNO,)
     email = forms.CharField(label='Email', max_length=150, widget=forms.EmailInput(attrs={'class': 'form-control'}))
     domicilio = forms.CharField(label='Domicilio Particular', max_length=250, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    telefono =  forms.CharField(label='Teléfono', max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    sexo =  forms.ChoiceField(label="Sexo",  widget=forms.Select(attrs={'class': 'form-control'}), choices=SEXO,)
+    edad =  forms.CharField(label='Edad', max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}))
     telefono =  forms.CharField(label='Teléfono', max_length=30, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
 

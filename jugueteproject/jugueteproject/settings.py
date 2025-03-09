@@ -39,9 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'qr_code',
     'jugueteapp',
-    'rest_framework',
+    #'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -140,7 +139,7 @@ print(STATIC_URL)
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    "C:/Users/jazyi/django/juguetes/jugueteproject/static",  
+    #"C:/Users/k3nsh1n/Dev/juguetes/jugueteproject/static",  
 ]
 
 

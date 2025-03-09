@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils import timezone
+from django.utils.timezone import now
 
 # Create your models here.
 class User(models.Model):
@@ -36,7 +36,9 @@ class workerModel(models.Model):
     email = models.CharField(max_length=100, null=False, blank=False)
     domicilio = models.CharField(max_length=250, null=True, blank=False)
     telefono = models.CharField(max_length=30, null=True, blank=False)
-    createdat = models.DateTimeField(default=datetime.now())
+    sexo = models.CharField(max_length=20, null=True, blank=False)
+    edad = models.CharField(max_length=2, null=True, blank=False)
+    createdat = models.DateTimeField()
     user_id = models.IntegerField(null=False, blank=False)
 
     def __str__(self):
@@ -53,8 +55,8 @@ class childModel(models.Model):
     edad = models.FloatField()
     sexo = models.CharField(max_length=20, null=False, blank=False)
     entregado = models.CharField(max_length=100, null=True, blank=True)
-    qrimg = models.BinaryField()
-    createdat = models.DateTimeField(default=datetime.now())
+    #qrimg = models.BinaryField()
+    createdat = models.DateTimeField()
     worker_id = models.ForeignKey(workerModel, on_delete=models.CASCADE)
     
     def __str__(self):

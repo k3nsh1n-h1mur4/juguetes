@@ -10,14 +10,14 @@ from fpdf import FPDF
 import sqlite3
 import qrcode
 from qrcode import QRCode
-from PIL import Image
-import pyqrcode
-import io
-import reportlab
-from PIL import Image
-from reportlab.pdfgen import canvas
-import segno
-from reportlab.lib.styles import ParagraphStyle
+#from PIL import Image
+#import pyqrcode
+#import io
+#import reportlab
+#from PIL import Image
+#from reportlab.pdfgen import canvas
+#import segno
+#from reportlab.lib.styles import ParagraphStyle
 
 
 # Create your views here.
@@ -119,7 +119,9 @@ def registerW(request):
             email = form.cleaned_data['email']
             domicilio = form.cleaned_data['domicilio']
             telefono = form.cleaned_data['telefono']
-            worker = workerModel.objects.create(matricula=matricula, nombre=nombre, categoria=categoria, antiguedad=antiguedad, adscripcion=adscripcion, t_contr=t_contr, turno=turno, email=email, domicilio=domicilio, telefono=telefono, user_id=request.user.id)
+            sexo = form.cleaned_data['sexo']
+            edad = form.cleaned_data['edad']
+            worker = workerModel.objects.create(matricula=matricula, nombre=nombre, categoria=categoria, antiguedad=antiguedad, adscripcion=adscripcion, t_contr=t_contr, turno=turno, email=email, domicilio=domicilio, telefono=telefono, sexo=sexo, edad=edad, user_id=request.user.id)
             print(worker)
             if worker is not None:
                 print("Trabajador Registrado")
